@@ -1,0 +1,39 @@
+import stripe
+from django.conf import settings
+from django.shortcuts import render, redirect
+from .models import Subscription
+
+stripe.api_key = settings.STRIPE_SECRET_KEY
+
+def checkout(request):
+    if request.method == 'POST':
+        stripe_token = request.POST['stripeToken']
+        subscription_type = request.POST['subscription_type']
+        
+        # Create a Stripe customer
+        customer = stripe.Customer.create(
+            email=request.user.email,
+            source=stripe_token,
+        )
+
+        # Charge the customer
+        if subscription_type == 'monthly':
+            price = 10.00  # Monthly price
+        else:
+            price = 100.00  # Yearly price
+
+        charge = stripe.Charge.create(
+            customer=customer.id,
+            amount=int(price * 100),  # Stripe works with cents
+            currency='usd',
+            description='Subscription Charge',
+        )
+
+        # Create subscription
+        subscription = Subscription(user=request.user, subscription_type=subscription_type)
+        subscription.save()
+
+        return redirect('profile')
+
+    return render(request, 'checkout.html')
+    
