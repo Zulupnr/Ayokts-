@@ -1,0 +1,18 @@
+<form action="/checkout" method="POST">
+    {% csrf_token %}
+    <label for="subscription_type">Select Subscription Type:</label>
+    <select name="subscription_type" id="subscription_type">
+        <option value="monthly">Monthly - $10</option>
+        <option value="yearly">Yearly - $100</option>
+    </select>
+
+    <script
+        src="https://checkout.stripe.com/checkout.js"
+        class="stripe-button"
+        data-key="{{ stripe_publishable_key }}"
+        data-amount="1000"
+        data-name="Product Marketplace"
+        data-description="Subscription"
+        data-currency="usd">
+    </script>
+</form>
